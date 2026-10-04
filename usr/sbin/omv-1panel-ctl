@@ -1,0 +1,221 @@
+#!/usr/bin/env dash
+#
+# This file is part of OpenMediaVault.
+#
+# @license   https://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    ${GITHUB_USER}
+#
+# OpenMediaVault is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# Control the 1Panel server management panel from the OMV plugin.
+# The official upstream binaries and installer are used exclusively;
+# nothing is compiled or patched by this script.
+#
+# Usage: omv-1panel-ctl <cmd> [args]
+#
+# Commands:
+#   install <installDir> <port> <entrance> <username> <password> <lang>
+#                                download the official release tarball
+#                                from the 1Panel CDN, verify sha256 and
+#                                run the official installer
+#                                non-interactively
+#   upgrade                      upgrade online via '1pctl update'
+#   uninstall <installDir>       non-interactive uninstall, the panel
+#                                data directory is kept
+#   start|stop|restart           manage both systemd services
+#   status                       print "running"|"partial"|"stopped"|
+#                                "notinstalled"
+#   version                      print the installed version number
+#   latest                       print the latest upstream version number
+#   userinfo                     print '1pctl user-info' (panel address,
+#                                secure entrance, user name)
+#   logs                         print the last 300 log lines of both
+#                                systemd services
+
+set -u
+
+CDN_BASE="https://resource.fit2cloud.com/1panel/package/v2/stable"
+
+CMD="${1:-}"
+
+usage() {
+	echo "Usage: omv-1panel-ctl <install|upgrade|uninstall|start|stop|restart|status|version|latest|userinfo|account|logs> [args]" >&2
+	exit 64
+}
+
+# Map the machine architecture to the upstream tarball suffix.
+map_arch() {
+	case "$(uname -m)" in
+		x86_64)  echo "amd64" ;;
+		aarch64) echo "arm64" ;;
+		armv7l)  echo "armv7" ;;
+		*)       uname -m ;;
+	esac
+}
+
+case "$CMD" in
+	install)
+		[ $# -eq 7 ] || usage
+		INSTALL_DIR="$2"; PORT="$3"; ENTRANCE="$4"; USERNAME="$5"; PASSWORD="$6"; LANG_SEL="$7"
+
+		if command -v 1panel >/dev/null 2>&1 || command -v 1pctl >/dev/null 2>&1; then
+			echo "ERROR: 1Panel is already installed. Use the Upgrade button instead." >&2
+			exit 1
+		fi
+		case "$PORT" in
+			''|*[!0-9]*) echo "ERROR: invalid port '$PORT'" >&2; exit 1 ;;
+		esac
+		[ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ] || { echo "ERROR: invalid port '$PORT'" >&2; exit 1; }
+		printf '%s' "$ENTRANCE" | grep -qE '^[a-zA-Z0-9_]{3,30}$' \
+			|| { echo "ERROR: invalid entrance '$ENTRANCE' (3-30 characters, letters/digits/underscore)" >&2; exit 1; }
+		printf '%s' "$USERNAME" | grep -qE '^[a-zA-Z0-9_]{3,30}$' \
+			|| { echo "ERROR: invalid username '$USERNAME' (3-30 characters, letters/digits/underscore)" >&2; exit 1; }
+		printf '%s' "$PASSWORD" | grep -qE '^[a-zA-Z0-9_!@#$%*,.?]{8,30}$' \
+			|| { echo "ERROR: password contains unsupported characters or wrong length (8-30)" >&2; exit 1; }
+
+		VER="$(curl -fsSL --max-time 10 "${CDN_BASE}/latest" 2>/dev/null | tr -d ' \r\n"')"
+		if [ -z "$VER" ]; then
+			echo "ERROR: unable to determine the latest 1Panel version from ${CDN_BASE}/latest" >&2
+			exit 1
+		fi
+		# The CDN paths and tarball names carry the v prefix (latest
+		# returns e.g. "v2.3.2"); strip it only for the display version.
+		DISP_VER="${VER#v}"
+		ARCH="$(map_arch)"
+		FILE="1panel-${VER}-linux-${ARCH}.tar.gz"
+		URL="${CDN_BASE}/${VER}/release/${FILE}"
+		WORK="$(mktemp -d /tmp/1panel-install.XXXXXX)"
+
+		echo "Downloading ${URL} ..."
+		if ! curl -fSL --retry 3 --max-time 900 -o "${WORK}/${FILE}" "$URL"; then
+			echo "ERROR: download failed" >&2
+			rm -rf "$WORK"
+			exit 1
+		fi
+
+		if curl -fsSL --max-time 30 -o "${WORK}/checksums.txt" \
+			"${CDN_BASE}/${VER}/release/checksums.txt" 2>/dev/null; then
+			EXPECTED="$(grep -E "(^|[[:space:]])${FILE}\$" "${WORK}/checksums.txt" | awk '{print $1}' | head -n 1)"
+			if [ -n "$EXPECTED" ]; then
+				ACTUAL="$(sha256sum "${WORK}/${FILE}" | awk '{print $1}')"
+				if [ "$EXPECTED" != "$ACTUAL" ]; then
+					echo "ERROR: sha256 mismatch (expected ${EXPECTED}, got ${ACTUAL})" >&2
+					rm -rf "$WORK"
+					exit 1
+				fi
+				echo "sha256 checksum OK."
+			else
+				echo "WARNING: ${FILE} not listed in checksums.txt, skipping verification." >&2
+			fi
+		else
+			echo "WARNING: checksums.txt unavailable, skipping verification." >&2
+		fi
+
+		echo "Extracting ..."
+		tar -xzf "${WORK}/${FILE}" -C "$WORK"
+
+		# The tarball contains a top-level directory
+		# 1panel-<version>-linux-<arch>/ holding install.sh, 1pctl and
+		# the systemd unit files.
+		SRC_DIR="${WORK}/1panel-${VER}-linux-${ARCH}"
+		if [ ! -f "${SRC_DIR}/install.sh" ]; then
+			SRC_DIR="$(find "$WORK" -maxdepth 2 -name install.sh | head -n 1 | xargs dirname)"
+		fi
+		if [ ! -f "${SRC_DIR}/install.sh" ]; then
+			echo "ERROR: install.sh not found in the extracted archive" >&2
+			rm -rf "$WORK"
+			exit 1
+		fi
+
+		echo "Running the official installer (Docker installation and daemon.json changes are disabled) ..."
+		export PANEL_NON_INTERACTIVE=true
+		export PANEL_INSTALL_DIR="$INSTALL_DIR"
+		export PANEL_PORT="$PORT"
+		export PANEL_ENTRANCE="$ENTRANCE"
+		export PANEL_USERNAME="$USERNAME"
+		export PANEL_PASSWORD="$PASSWORD"
+		export PANEL_LANG="$LANG_SEL"
+		export PANEL_INSTALL_DOCKER=n
+		export PANEL_CONFIGURE_ACCELERATOR=n
+		export PANEL_REPLACE_DAEMON_JSON=n
+		if ! bash "${SRC_DIR}/install.sh" --non-interactive; then
+			echo "ERROR: official installer failed" >&2
+			rm -rf "$WORK"
+			exit 1
+		fi
+
+		rm -rf "$WORK"
+		echo "1Panel ${DISP_VER} installed. Panel data directory: ${INSTALL_DIR}/1panel"
+		echo "IMPORTANT - the panel password is masked in '1pctl user-info'; note it down before leaving this page."
+	;;
+	upgrade)
+		command -v 1pctl >/dev/null 2>&1 || { echo "ERROR: 1Panel is not installed" >&2; exit 1; }
+		1pctl update
+	;;
+	uninstall)
+		[ $# -eq 2 ] || usage
+		INSTALL_DIR="$2"
+		if ! command -v 1pctl >/dev/null 2>&1; then
+			echo "1Panel is not installed, nothing to do."
+			exit 0
+		fi
+		echo "Stopping and disabling the 1Panel services ..."
+		systemctl stop 1panel-core.service 2>/dev/null || true
+		systemctl stop 1panel-agent.service 2>/dev/null || true
+		systemctl disable 1panel-core.service 2>/dev/null || true
+		systemctl disable 1panel-agent.service 2>/dev/null || true
+		rm -f /etc/systemd/system/1panel-core.service /etc/systemd/system/1panel-agent.service
+		systemctl daemon-reload
+		systemctl reset-failed 2>/dev/null || true
+		echo "Removing the 1Panel binaries ..."
+		rm -f /usr/local/bin/1pctl /usr/local/bin/1panel-core /usr/local/bin/1panel-agent /usr/local/bin/lang
+		rm -f /usr/bin/1pctl /usr/bin/1panel /usr/bin/1panel-core /usr/bin/1panel-agent
+		rm -rf /etc/1panel
+		echo "Uninstalled. The panel data directory ${INSTALL_DIR}/1panel has been kept."
+	;;
+	start|stop|restart)
+		command -v 1pctl >/dev/null 2>&1 || { echo "ERROR: 1Panel is not installed" >&2; exit 1; }
+		1pctl "$CMD" all
+	;;
+	status)
+		if ! command -v 1panel >/dev/null 2>&1 && ! command -v 1pctl >/dev/null 2>&1; then
+			echo "notinstalled"
+			exit 0
+		fi
+		CORE="$(systemctl is-active 1panel-core 2>/dev/null || true)"
+		AGENT="$(systemctl is-active 1panel-agent 2>/dev/null || true)"
+		ACTIVE=0
+		[ "$CORE" = "active" ] && ACTIVE=$((ACTIVE+1))
+		[ "$AGENT" = "active" ] && ACTIVE=$((ACTIVE+1))
+		if [ "$ACTIVE" -eq 2 ]; then
+			echo "running"
+		elif [ "$ACTIVE" -eq 1 ]; then
+			echo "partial"
+		else
+			echo "stopped"
+		fi
+	;;
+	version)
+		command -v 1pctl >/dev/null 2>&1 || exit 0
+		1pctl version 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)+[^ ]*' | head -n 1 || true
+	;;
+	latest)
+		curl -fsSL --max-time 10 "${CDN_BASE}/latest" 2>/dev/null | tr -d ' \r\n"v' || true
+	;;
+	userinfo)
+		command -v 1pctl >/dev/null 2>&1 || { echo "ERROR: 1Panel is not installed" >&2; exit 1; }
+		1pctl user-info
+	;;
+	logs)
+		command -v 1pctl >/dev/null 2>&1 || { echo "ERROR: 1Panel is not installed" >&2; exit 1; }
+		journalctl --no-pager -n 300 -u 1panel-core -u 1panel-agent 2>/dev/null || true
+	;;
+	*)
+		usage
+	;;
+esac
+
+exit 0

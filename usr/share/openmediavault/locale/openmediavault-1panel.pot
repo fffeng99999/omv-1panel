@@ -1,0 +1,175 @@
+# Translation template for openmediavault-1panel.
+# Copyright (C) 2026 ${GITHUB_USER}
+# This file is distributed under the same license as the openmediavault-1panel package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: openmediavault-1panel 8.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 12:00+0800\n"
+"PO-Revision-Date: 2026-10-04 12:00+0800\n"
+"Last-Translator: ${GITHUB_USER}\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "1Panel"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Updated 1Panel settings."
+msgstr ""
+
+msgid "Running"
+msgstr ""
+
+msgid "Stopped"
+msgstr ""
+
+msgid "Partial"
+msgstr ""
+
+msgid "Not installed"
+msgstr ""
+
+msgid "1Panel is a Linux server management panel. The settings below are used by the Install button, which downloads the official upstream release from the 1Panel CDN and runs the official installer non-interactively. Save the settings first, then use the buttons below to install and manage the panel. The panel itself (app store, websites, databases) is managed in the native 1Panel interface."
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Service status"
+msgstr ""
+
+msgid "Installed version"
+msgstr ""
+
+msgid "Latest version"
+msgstr ""
+
+msgid "Update available"
+msgstr ""
+
+msgid "Service"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Automatically manage the panel services from OMV. On Apply the 1Panel systemd services are enabled and started (when installed). Disabling the service stops and disables them on Apply. The panel is installed and uninstalled with the buttons below."
+msgstr ""
+
+msgid "Installation"
+msgstr ""
+
+msgid "Install directory"
+msgstr ""
+
+msgid "Base directory for the 1Panel installation. The panel data is stored in a subdirectory named 1panel and is kept when the panel is uninstalled."
+msgstr ""
+
+msgid "Panel language"
+msgstr ""
+
+msgid "Language of the native 1Panel interface, set at installation time."
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "中文"
+msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "Web port"
+msgstr ""
+
+msgid "Port of the 1Panel web interface, set at installation time."
+msgstr ""
+
+msgid "Secure entrance"
+msgstr ""
+
+msgid "Secret path of the web interface, 3-30 characters (letters, digits, underscore). Generated randomly on plugin installation. Changing it after installation requires the native 1Panel interface."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Panel administrator name, 3-30 characters (letters, digits, underscore). Set at installation time. Changing it afterwards requires the native 1Panel interface."
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Panel password, 8-30 characters (letters, digits and _!@#$%*,.? only). Generated randomly on plugin installation. Note it down before installing - it is masked afterwards. Changing it afterwards requires the native 1Panel interface."
+msgstr ""
+
+msgid "Install"
+msgstr ""
+
+msgid "Do you really want to install 1Panel? The official release is downloaded from the 1Panel CDN and installed with the settings saved above. Docker installation and daemon.json changes are disabled."
+msgstr ""
+
+msgid "Upgrade"
+msgstr ""
+
+msgid "Do you really want to upgrade 1Panel online? The official upgrade command is executed. Read the upstream release notes before major upgrades."
+msgstr ""
+
+msgid "Uninstall"
+msgstr ""
+
+msgid "Do you really want to uninstall 1Panel? The services are stopped and the binaries are removed. The panel data directory is KEPT, but websites, databases and app containers it manages may stop working. This cannot be undone automatically."
+msgstr ""
+
+msgid "Start"
+msgstr ""
+
+msgid "Stop"
+msgstr ""
+
+msgid "Do you really want to stop the 1Panel services? The web interface becomes unavailable until you start the panel again."
+msgstr ""
+
+msgid "Restart"
+msgstr ""
+
+msgid "View user info"
+msgstr ""
+
+msgid "View logs"
+msgstr ""
+
+msgid "Open 1Panel"
+msgstr ""
+
+msgid "1Panel install output"
+msgstr ""
+
+msgid "1Panel upgrade output"
+msgstr ""
+
+msgid "1Panel uninstall output"
+msgstr ""
+
+msgid "1Panel start output"
+msgstr ""
+
+msgid "1Panel stop output"
+msgstr ""
+
+msgid "1Panel restart output"
+msgstr ""
+
+msgid "1Panel user info"
+msgstr ""
+
+msgid "1Panel logs"
+msgstr ""

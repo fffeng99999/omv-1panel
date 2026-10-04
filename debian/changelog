@@ -1,0 +1,17 @@
+openmediavault-1panel (8.0.1) stable; urgency=medium
+
+  * Initial release: 1Panel server management panel plugin for
+    OpenMediaVault 8.x.
+    - Installs the official upstream binaries (v2 series) from the
+      1Panel CDN with sha256 verification, non-interactively using
+      the official installer (Docker installation and daemon.json
+      changes are explicitly disabled).
+    - Start/stop/restart, online upgrade through the official
+      '1pctl update' and non-interactive uninstall that keeps the
+      panel data directory.
+    - Live status of the 1panel-core and 1panel-agent services,
+      installed/latest version detection, log viewer and account
+      synchronization via the official CLI.
+    - Simplified and Traditional Chinese translations included.
+
+ -- ${GITHUB_USER}  Sat, 04 Oct 2026 12:00:00 +0800

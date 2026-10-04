@@ -1,0 +1,41 @@
+{
+	"type": "config",
+	"id": "conf.service.onepanel",
+	"title": "1Panel",
+	"queryinfo": {
+		"xpath": ".//services/onepanel",
+		"iterable": false
+	},
+	"properties": {
+		"enable": {
+			"type": "boolean",
+			"default": false
+		},
+		"installDir": {
+			"type": "string",
+			"default": "/opt"
+		},
+		"port": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 65535,
+			"default": 10086
+		},
+		"entrance": {
+			"type": "string",
+			"default": ""
+		},
+		"username": {
+			"type": "string",
+			"default": "admin"
+		},
+		"password": {
+			"type": "string",
+			"default": ""
+		},
+		"lang": {
+			"type": "string",
+			"default": "zh"
+		}
+	}
+}

@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/onepanel"
+  title: _("1Panel")
+  component: omv-services-onepanel-navigation-page

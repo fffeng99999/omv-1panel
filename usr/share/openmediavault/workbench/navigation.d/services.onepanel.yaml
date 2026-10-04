@@ -1,0 +1,10 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "services.onepanel"
+  text: _("1Panel")
+  icon: "mdi:server"
+  url: "/services/onepanel"
+  permissions:
+    role:
+    - admin

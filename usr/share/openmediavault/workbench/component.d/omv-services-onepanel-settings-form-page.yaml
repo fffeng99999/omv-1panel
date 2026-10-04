@@ -1,0 +1,211 @@
+version: "1.0"
+type: component
+data:
+  name: omv-services-onepanel-settings-form-page
+  type: formPage
+  config:
+    request:
+      service: OnePanel
+      get:
+        method: get
+        transform:
+          statusText: "{{ statusText | translate }}"
+      post:
+        method: set
+    hints:
+      - type: info
+        text: _("1Panel is a Linux server management panel. The settings below are used by the Install button, which downloads the official upstream release from the 1Panel CDN and runs the official installer non-interactively. Save the settings first, then use the buttons below to install and manage the panel. The panel itself (app store, websites, databases) is managed in the native 1Panel interface.")
+        dismissible: true
+        stateId: 6b8e2c1a-9f3d-4c47-a2b6-0d84e13f7c66
+    fields:
+      - type: divider
+        title: _("Status")
+      - type: textInput
+        name: statusText
+        label: _("Service status")
+        submitValue: false
+        readonly: true
+      - type: textInput
+        name: installedVersion
+        label: _("Installed version")
+        submitValue: false
+        readonly: true
+      - type: textInput
+        name: latestVersion
+        label: _("Latest version")
+        submitValue: false
+        readonly: true
+      - type: checkbox
+        name: updateAvailable
+        label: _("Update available")
+        submitValue: false
+        readonly: true
+
+      - type: divider
+        title: _("Service")
+      - type: checkbox
+        name: enable
+        label: _("Enabled")
+        hint: _("Automatically manage the panel services from OMV. On Apply the 1Panel systemd services are enabled and started (when installed). Disabling the service stops and disables them on Apply. The panel is installed and uninstalled with the buttons below.")
+        value: false
+
+      - type: divider
+        title: _("Installation")
+      - type: textInput
+        name: installDir
+        label: _("Install directory")
+        hint: _("Base directory for the 1Panel installation. The panel data is stored in a subdirectory named 1panel and is kept when the panel is uninstalled.")
+        value: "/opt"
+        validators:
+          required: true
+      - type: select
+        name: lang
+        label: _("Panel language")
+        hint: _("Language of the native 1Panel interface, set at installation time.")
+        value: "zh"
+        options:
+          - label: _("English")
+            value: "en"
+          - label: _("中文")
+            value: "zh"
+
+      - type: divider
+        title: _("Account")
+      - type: numberInput
+        name: port
+        label: _("Web port")
+        hint: _("Port of the 1Panel web interface, set at installation time.")
+        value: 10086
+        validators:
+          required: true
+          min: 1
+          max: 65535
+          patternType: port
+      - type: textInput
+        name: entrance
+        label: _("Secure entrance")
+        hint: _("Secret path of the web interface, 3-30 characters (letters, digits, underscore). Generated randomly on plugin installation. Changing it after installation requires the native 1Panel interface.")
+        validators:
+          required: true
+      - type: textInput
+        name: username
+        label: _("Username")
+        hint: _("Panel administrator name, 3-30 characters (letters, digits, underscore). Set at installation time. Changing it afterwards requires the native 1Panel interface.")
+        validators:
+          required: true
+      - type: passwordInput
+        name: password
+        label: _("Password")
+        hint: _("Panel password, 8-30 characters (letters, digits and _!@#$%*,.? only). Generated randomly on plugin installation. Note it down before installing - it is masked afterwards. Changing it afterwards requires the native 1Panel interface.")
+        value: ""
+        autocomplete: "new-password"
+    buttons:
+      - text: _("Install")
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Do you really want to install 1Panel? The official release is downloaded from the 1Panel CDN and installed with the settings saved above. Docker installation and daemon.json changes are disabled.")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel install output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: install
+      - text: _("Upgrade")
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Do you really want to upgrade 1Panel online? The official upgrade command is executed. Read the upstream release notes before major upgrades.")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel upgrade output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: upgrade
+      - text: _("Uninstall")
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Do you really want to uninstall 1Panel? The services are stopped and the binaries are removed. The panel data directory is KEPT, but websites, databases and app containers it manages may stop working. This cannot be undone automatically.")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel uninstall output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: uninstall
+      - text: _("Start")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel start output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: start
+      - text: _("Stop")
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Do you really want to stop the 1Panel services? The web interface becomes unavailable until you start the panel again.")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel stop output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: stop
+      - text: _("Restart")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel restart output")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: restart
+      - text: _("View user info")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel user info")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: getUserInfo
+      - text: _("View logs")
+        execute:
+          type: taskDialog
+          taskDialog:
+            config:
+              title: _("1Panel logs")
+              width: "70%"
+              startOnInit: true
+              request:
+                service: OnePanel
+                method: getLog
+      - text: _("Open 1Panel")
+        execute:
+          type: url
+          url: "/externalRedirect/{{ ['http://', location() | get('hostname'), ':', port, '/', entrance] | join }}"
+      - template: cancel
+        execute:
+          type: url
+          url: "/services/onepanel"
+      - template: submit

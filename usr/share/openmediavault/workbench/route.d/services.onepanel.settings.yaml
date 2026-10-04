@@ -1,0 +1,8 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/onepanel/settings"
+  title: _("Settings")
+  editing: true
+  notificationTitle: _("Updated 1Panel settings.")
+  component: omv-services-onepanel-settings-form-page

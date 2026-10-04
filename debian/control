@@ -1,0 +1,26 @@
+Source: openmediavault-1panel
+Section: web
+XB-Plugin-Section: services
+XB-Plugin-Architecture: all
+Priority: optional
+Maintainer: ${GITHUB_USER}
+Build-Depends: debhelper (>= 12)
+Standards-Version: 3.9.6
+Homepage: https://github.com/${GITHUB_USER}/omv-1panel
+
+Package: openmediavault-1panel
+Architecture: all
+Depends: openmediavault (>= 8.0), curl, ca-certificates
+Priority: optional
+Description: openmediavault 1Panel plugin
+ Manage the 1Panel Linux server management panel from the
+ OpenMediaVault web interface: installs the official upstream
+ binaries (downloaded from the 1Panel CDN, never recompiled),
+ runs the official installer non-interactively with a random
+ secure entrance and generated credentials, and offers start/
+ stop/restart, online upgrade via the official '1pctl update',
+ non-interactive uninstall (data is kept), live service status
+ for the 1panel-core and 1panel-agent systemd units, log viewer
+ and account synchronization through the official CLI.
+ The panel itself (app store, websites, databases) is managed
+ in the native 1Panel interface. Includes Chinese translations.

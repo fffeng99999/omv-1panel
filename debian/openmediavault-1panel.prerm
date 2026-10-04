@@ -1,0 +1,28 @@
+#!/usr/bin/env dash
+#
+# This file is part of OpenMediaVault.
+#
+# @license   https://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    ${GITHUB_USER}
+#
+# OpenMediaVault is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+
+set -e
+
+case "$1" in
+	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear|remove|purge)
+		# The 1Panel installation (binaries, systemd units, panel data
+		# directory) is intentionally never touched here. Removing the
+		# plugin leaves the panel installed and running.
+	;;
+
+	*)
+		echo "prerm called with unknown argument '$1'" >&2
+		exit 1
+	;;
+esac
+
+exit 0

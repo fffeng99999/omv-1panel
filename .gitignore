@@ -1,0 +1,9 @@
+dist/
+*.deb
+*.buildinfo
+*.changes
+*.upload
+debian/.debhelper/
+debian/openmediavault-1panel/
+debian/files
+debian/debhelper-build-stamp
