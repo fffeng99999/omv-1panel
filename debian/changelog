@@ -1,3 +1,14 @@
+openmediavault-1panel (8.0.2) stable; urgency=medium
+
+  * Fix the "Open 1Panel" button: URI-encode the generated external
+    URL with the encodeuricomponent filter. Without encoding the URL
+    contains slashes, which do not match the single-segment
+    externalRedirect/:url workbench route, so the click ended on the
+    404 page instead of opening the panel. Same fix as immich 8.0.3
+    and example 8.0.2.
+
+ -- fffeng99999  Mon, 06 Oct 2026 19:25:00 +0800
+
 openmediavault-1panel (8.0.1) stable; urgency=medium
 
   * Initial release: 1Panel server management panel plugin for

@@ -203,7 +203,7 @@ data:
       - text: _("Open 1Panel")
         execute:
           type: url
-          url: "/externalRedirect/{{ ['http://', location() | get('hostname'), ':', port, '/', entrance] | join }}"
+          url: "/externalRedirect/{{ ['http://', location() | get('hostname'), ':', port, '/', entrance] | join | encodeuricomponent }}"
       - template: cancel
         execute:
           type: url
