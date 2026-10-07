@@ -7,7 +7,7 @@ openmediavault-1panel (8.0.2) stable; urgency=medium
     404 page instead of opening the panel. Same fix as immich 8.0.3
     and example 8.0.2.
 
- -- fffeng99999  Mon, 06 Oct 2026 19:25:00 +0800
+ -- fffeng99999 <fffeng99999@users.noreply.github.com>  Mon, 06 Oct 2026 19:25:00 +0800
 
 openmediavault-1panel (8.0.1) stable; urgency=medium
 
@@ -25,4 +25,4 @@ openmediavault-1panel (8.0.1) stable; urgency=medium
       synchronization via the official CLI.
     - Simplified and Traditional Chinese translations included.
 
- -- ${GITHUB_USER}  Sat, 04 Oct 2026 12:00:00 +0800
+ -- ${GITHUB_USER} <${GITHUB_USER}@users.noreply.github.com>  Sat, 04 Oct 2026 12:00:00 +0800
